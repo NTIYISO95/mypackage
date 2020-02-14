@@ -1,22 +1,11 @@
+#from mypackage.includes import constants
 import pandas as pd
 import numpy as np
-ebp_url = 'https://raw.githubusercontent.com/Explore-AI/Public-Data/master/Data/electrification_by_province.csv'
-ebp_df = pd.read_csv(ebp_url)
 
-for col, row in ebp_df.iloc[:,1:].iteritems():
-    ebp_df[col] = ebp_df[col].str.replace(',','').astype(int)
 
-ebp_df.head()
-twitter_url = 'https://raw.githubusercontent.com/Explore-AI/Public-Data/master/Data/twitter_nov_2019.csv'
-twitter_df = pd.read_csv(twitter_url)
-twitter_df.head()
-# gauteng ebp data as a list
-gauteng = ebp_df['Gauteng'].astype(float).to_list()
-
-# dates for twitter tweets
-dates = twitter_df['Date'].to_list()
 
 # dictionary mapping official municipality twitter handles to the municipality name
+
 mun_dict = {
     '@CityofCTAlerts' : 'Cape Town',
     '@CityPowerJhb' : 'Johannesburg',
@@ -61,10 +50,11 @@ stop_words_dict = {
         'same', 'were', 'it', 'every', 'third', 'together'
     ]
 }
+
 # Function 1:
 
 ### START FUNCTION
-def dictionary_of_metrics(items):
+def dictionary_of_metrics(items:list):
     itemsort = sorted(items)
     return {"mean": round(np.mean(items),2),
             "median": round(np.median(items),2),
@@ -77,7 +67,7 @@ def dictionary_of_metrics(items):
 # Function 2:
 
 ### START FUNCTION
-def five_num_summary(items):
+def five_num_summary(items:list):
     sorteditems = sorted(items)
     return {'max': sorteditems[-1],
             'median': round(np.median(items),2) ,
@@ -88,17 +78,17 @@ def five_num_summary(items):
 # Function 3:
 
 ### START FUNCTION
-def date_parser(dates):
+def date_parser(dates:list):
     return [i.split(' ', 1)[0] for i in dates]
 ### END FUNCTION
 # Funtion 4:
 
 ### START FUNCTION
-def extract_municipality_hashtags(df):
+def extract_municipality_hashtags(df,cities=mun_dict):
     contains_email = []
     hashtags = []
     for x in df["Tweets"]:
-        contains_email.append([mun_dict[i] for i in x.split(' ') if i in mun_dict.keys()])
+        contains_email.append([cities[i] for i in x.split(' ') if i in cities.keys()])
         hashtags.append([i.lower() for i in x.split(' ') if '#' in i])
     contains_email_nan = [i if i else np.nan for i in contains_email]
     hashtags_nan = [i if i else np.nan for i in hashtags]
@@ -136,9 +126,9 @@ def word_splitter(df):
 # Funtion 7:
 
 ### START FUNCTION
-def stop_words_remover(df):
+def stop_words_remover(df,stops=stop_words_dict):
     def hash_me(words):
-        return [i for i in words.lower().split() if i not in stop_words_dict["stopwords"]]
+        return [i for i in words.lower().split() if i not in stops["stopwords"]]
 
     df["Without Stop Words"] = df["Tweets"].apply(hash_me)
     return df   
